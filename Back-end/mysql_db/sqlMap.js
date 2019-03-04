@@ -7,13 +7,13 @@ let sqlMap = {
     addFromRecycleBin: 'insert into Note_List (Note_Name, Note_Time, Note_Content, Note_Type) select Note_Name, Note_Time, Note_Content, Note_Type from Note_Del_List where Note_Time = ?',
 
     // 查询Note列表
-    select: 'select * from Note_List',
+    select: 'select * from Note_List order by Note_Time desc limit 7 offset ?',
 
     // 通过Note_Id查询Note列表
     selectOne: 'select * from Note_List where Note_Id = ?',
 
     // 通过Note_Type查询Note列表
-    selectByType: 'select * from Note_List where Note_Type = ?',
+    selectByType: 'select * from Note_List where Note_Type = ? order by Note_Time desc limit 7 offset ?',
 
     // 通过Note_Id删除Note
     delete: 'delete from Note_List where Note_Id = ?',

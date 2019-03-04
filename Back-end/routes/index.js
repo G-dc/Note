@@ -158,7 +158,8 @@ router.get('/moveToRecycleBin', (req, res) => {
 //  获取Note列表
 router.get('/getNoteList', (req, res) => {
   let sql = $.editNote.select
-  conn.query(sql, (err, result) => {
+  let params = req.query
+  conn.query(sql, [(params.pageIndex - 1) * params.pageSize], (err, result) => {
     if (err) {
       console.log(err)
     } else {
@@ -171,7 +172,7 @@ router.get('/getNoteList', (req, res) => {
 router.get('/getNoteListByType', (req, res) => {
   let sql = $.editNote.selectByType
   let params = req.query
-  conn.query(sql, [params.type_id], (err, result) => {
+  conn.query(sql, [params.type_id, (params.pageIndex - 1) * params.pageSize], (err, result) => {
     if (err) {
       console.log(err)
     } else {
