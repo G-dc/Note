@@ -1,15 +1,23 @@
 import ajx from '../request'
 
 // 获取全部Note列表
-export function getAllList () {
-  return ajx.get('/vue-note/api/getNoteList')
+export function getAllList (params) {
+  return ajx.get('/vue-note/api/getNoteList', {
+    params: {
+      type_id: params.currentType,
+      pageIndex: params.pageIndex,
+      pageSize: params.pageSize
+    }
+  })
 }
 
 // 按类别获取Note列表
-export function getSomeList (data) {
+export function getSomeList (params) {
   return ajx.get('/vue-note/api/getNoteListByType', {
     params: {
-      type_id: data
+      type_id: params.currentType,
+      pageIndex: params.pageIndex,
+      pageSize: params.pageSize
     }
   })
 }

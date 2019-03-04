@@ -3,7 +3,7 @@
     <div class="list-left-list">
       <el-form>
         <el-form-item label="分类搜索：">
-          <el-select v-model="currentType" @change="changeType">
+          <el-select v-model="getListTemp.currentType" @change="changeType">
             <el-option
               v-for="item in NoteTypeList"
               :key="item.id"
@@ -20,7 +20,7 @@
         @current-change="changePage"
         layout="prev, pager, next"
         :page-size="5"
-        :current-page="currentPage"
+        :current-page="getListTemp.pageIndex"
         :total="$store.state.pagination.total"></el-pagination>
     </div>
     <div class="list-right-content" v-if="currentNoteDetail.content">
@@ -40,7 +40,12 @@ export default {
       currentNoteDetail: {},
       currentPage: 1,
       NoteTypeList: [],
-      currentType: '全部'
+      currentType: '全部',
+      getListTemp: {
+        pageIndex: 1,
+        pageSize: 7,
+        currentType: '全部'
+      }
     }
   },
   components: {
@@ -59,12 +64,13 @@ export default {
     },
     getData () {
       this.NoteList = []
-      if (this.currentType === '全部') {
-        api.NoteList.getAllList().then(res => {
+      if (this.getListTemp.currentType === '全部') {
+        api.NoteList.getAllList(this.getListTemp).then(res => {
           const data = res.data
           if (res.code === 200) {
             if (data.length > 0) {
-              this.NoteList.push(...data.slice((this.currentPage - 1) * 5, 5 * this.currentPage))
+              this.NoteList.push(...data)
+              // this.NoteList.push(...data.slice((this.currentPage - 1) * 5, 5 * this.currentPage))
               this.$store.commit('UPDATE_TOTAL_PAGE', data.length)
               this.setData()
             } else {
@@ -82,11 +88,12 @@ export default {
           }
         })
       } else {
-        api.NoteList.getSomeList(this.currentType).then(res => {
+        api.NoteList.getSomeList(this.getListTemp).then(res => {
           const data = res.data
           if (res.code === 200) {
             if (data.length > 0) {
-              this.NoteList.push(...data.slice((this.currentPage - 1) * 5, 5 * this.currentPage))
+              this.NoteList.push(...data)
+              // this.NoteList.push(...data.slice((this.currentPage - 1) * 5, 5 * this.currentPage))
               this.$store.commit('UPDATE_TOTAL_PAGE', data.length)
               this.setData()
             } else {
