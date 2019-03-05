@@ -1,5 +1,11 @@
 let sqlMap = {
   editNote: {
+    // 查询Note列表总数
+    getNum: 'select count(1) from Note_List',
+
+    // 根据分类查询列表总数
+    getTypeNum: 'select count(1) from Note_List where Note_Type = ?',
+
     // 添加新的Note
     add: 'insert into Note_List (Note_Name, Note_Time, Note_Content, Note_Type) values (?, ?, ?, ?)',
 
@@ -22,16 +28,22 @@ let sqlMap = {
     update: 'update Note_List set Note_Name = ?, Note_Content = ?, Note_Time = ?, Note_Type = ? where Note_Id = ?'
   },
   editDeleteNote: {
+    // 查询回收站列表总数
+    getNum: 'select count(1) from Note_Del_List',
+
     /// 从Note列表移动数据到回收站
     add: 'insert into Note_Del_List (Note_Name, Note_Time, Note_Content, Note_Type) select Note_Name, Note_Time, Note_Content, Note_Type from Note_List where Note_Time = ?',
 
     // 查询回收站Note列表
-    select: 'select * from Note_Del_List',
+    select: 'select * from Note_Del_List order by Note_Time desc limit 8 offset ?',
 
     // 通过Note_Id删除Note
     delete: 'delete from Note_Del_List where Note_Id = ?'
   },
   editNoteType: {
+    // 查询类型总数
+    getNum: 'select count(1) from Note_Type',
+
     // 查询Note所有类型
     select: 'select * from Note_Type',
 
