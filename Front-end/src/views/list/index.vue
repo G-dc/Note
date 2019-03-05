@@ -6,9 +6,9 @@
           <el-select v-model="getListTemp.currentType" @change="changeType">
             <el-option
               v-for="item in NoteTypeList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.name">
+              :key="item.Type_Id"
+              :label="item.Type_Name"
+              :value="item.Type_Name">
             </el-option>
           </el-select>
         </el-form-item>
@@ -21,9 +21,10 @@
         layout="prev, pager, next"
         :page-size="5"
         :current-page="getListTemp.pageIndex"
-        :total="$store.state.pagination.total"></el-pagination>
+        :total="$store.state.pagination.total">
+      </el-pagination>
     </div>
-    <div class="list-right-content" v-if="currentNoteDetail.content">
+    <div class="list-right-content" v-if="currentNoteDetail.Note_Content">
       <list-content :data="currentNoteDetail" @editOne="editOne"/>
     </div>
   </div>
@@ -57,9 +58,9 @@ export default {
       this.NoteTypeList = []
       api.NoteList.getNoteTypeList().then(res => {
         if (res.code === 200) {
-          this.NoteTypeList.push(...res.data)
+          this.NoteTypeList.push(...res.data.content)
         }
-        this.NoteTypeList.unshift({ id: 0, name: '全部' })
+        this.NoteTypeList.unshift({ Type_Id: 0, Type_Name: '全部' })
       })
     },
     getData () {
@@ -68,10 +69,9 @@ export default {
         api.NoteList.getAllList(this.getListTemp).then(res => {
           const data = res.data
           if (res.code === 200) {
-            if (data.length > 0) {
-              this.NoteList.push(...data)
-              // this.NoteList.push(...data.slice((this.currentPage - 1) * 5, 5 * this.currentPage))
-              this.$store.commit('UPDATE_TOTAL_PAGE', data.length)
+            if (data.content.length > 0) {
+              this.NoteList.push(...data.content)
+              this.$store.commit('UPDATE_TOTAL_PAGE', data.totalSize)
               this.setData()
             } else {
               this.$store.commit('UPDATE_TOTAL_PAGE', 0)
@@ -91,10 +91,9 @@ export default {
         api.NoteList.getSomeList(this.getListTemp).then(res => {
           const data = res.data
           if (res.code === 200) {
-            if (data.length > 0) {
-              this.NoteList.push(...data)
-              // this.NoteList.push(...data.slice((this.currentPage - 1) * 5, 5 * this.currentPage))
-              this.$store.commit('UPDATE_TOTAL_PAGE', data.length)
+            if (data.content.length > 0) {
+              this.NoteList.push(...data.content)
+              this.$store.commit('UPDATE_TOTAL_PAGE', data.totalSize)
               this.setData()
             } else {
               this.$store.commit('UPDATE_TOTAL_PAGE', 0)
@@ -115,16 +114,16 @@ export default {
     setData () {
       if (this.NoteList.length > 0) {
         this.currentNoteDetail = this.NoteList[0]
-        this.$store.commit('UPDATE_NOTE_ID', this.NoteList[0].id)
+        this.$store.commit('UPDATE_NOTE_ID', this.NoteList[0].Note_Id)
       } else {
         this.currentNoteDetail = {}
         this.$store.commit('UPDATE_NOTE_ID', undefined)
       }
     },
     chooseOne (e) {
-      api.NoteList.getOne(e.id).then(res => {
+      api.NoteList.getOne(e.Note_Id).then(res => {
         if (res.code === 200) {
-          this.$store.commit('UPDATE_NOTE_ID', res.data.id)
+          this.$store.commit('UPDATE_NOTE_ID', res.data.Note_Id)
           this.currentNoteDetail = res.data
         }
       })
@@ -135,12 +134,12 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        let _NoteOne = this.NoteList.find((value, index, arr) => {
+        const _NoteOne = this.NoteList.find(value => {
           return value.id === e
         })
-        api.NoteList.moveToRecycleBin(_NoteOne.time).then(res => {
+        api.NoteList.moveToRecycleBin(_NoteOne.Note_Time).then(res => {
           if (res.code === 200) {
-            api.NoteList.deleteOne(_NoteOne.id).then(res1 => {
+            api.NoteList.deleteOne(_NoteOne.Note_Id).then(res1 => {
               if (res1.code === 200) {
                 this.$message({
                   message: '删除成功，可以在回收站查看删除内容，当前页面数据将重新加载。',
@@ -178,7 +177,7 @@ export default {
         this.$router.push({
           path: '/add-note',
           query: {
-            NoteId: e.id
+            NoteId: e.Note_Id
           }
         })
       }).catch(() => {

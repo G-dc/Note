@@ -1,6 +1,6 @@
 <template>
   <div class="add">
-    <el-form :model="form" :rules="rules">
+    <el-form :model="form" :rules="rules" ref="form">
       <el-form-item label="标题" label-width="100px" prop="title">
         <el-input v-model="form.title" style="width: 40%;"></el-input>
       </el-form-item>
@@ -8,9 +8,9 @@
         <el-select v-model="form.type" filterable allow-create default-first-option placeholder="请选择分类" style="width: 40%">
           <el-option
             v-for="item in typeList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.name">
+            :key="item.Type_Id"
+            :label="item.Type_Name"
+            :value="item.Type_Name">
           </el-option>
         </el-select>
       </el-form-item>
@@ -21,7 +21,7 @@
         </quill-editor>
       </el-form-item>
       <el-form-item style="margin-top: 100px;width: 80%;text-align: right;">
-        <el-button @click="resetFormData">重置</el-button>
+        <el-button @click="resetFormData('form')">重置</el-button>
         <el-button type="warning" :loading=isSaving @click="saveFormData">保存</el-button>
       </el-form-item>
     </el-form>
@@ -77,25 +77,24 @@ export default {
       this.typeList = []
       api.NoteList.getNoteTypeList().then(res => {
         if (res.code === 200) {
-          this.typeList.push(...res.data)
+          this.typeList.push(...res.data.content)
         }
       })
     },
     getNoteOne (e) {
       api.NoteList.getOne(e).then(res => {
         if (res.code === 200) {
-          this.form.title = res.data.title
-          this.form.content = res.data.content
-          this.form.type = res.data.type
-          let _id = 'id'
-          this.form[_id] = res.data.id
+          this.form.title = res.data.Note_Name
+          this.form.content = res.data.Note_Content
+          this.form.type = res.data.Note_Type
+
+          const _id = 'id'
+          this.form[_id] = res.data.Note_Id
         }
       })
     },
-    resetFormData () {
-      this.form.title = ''
-      this.from.type = ''
-      this.form.content = ''
+    resetFormData (formName) {
+      this.$refs[formName].resetFields()
     },
     saveFormData () {
       if (!this.form.title.trim()) {
@@ -119,9 +118,9 @@ export default {
       } else {
         if (this.$route.query.NoteId) {
           let time = new Date()
-          let key = 'time'
+          let key = 'Note_Time'
           this.form[key] = time.getTime()
-          let _params = qs.stringify(this.form)
+          const _params = qs.stringify(this.form)
           api.NoteList.updateNote(_params).then(res => {
             if (res.code === 200) {
               this.$message({
@@ -139,9 +138,9 @@ export default {
           })
         } else {
           let time = new Date()
-          let key = 'time'
+          const key = 'time'
           this.form[key] = time.getTime()
-          let _params = qs.stringify(this.form)
+          const _params = qs.stringify(this.form)
           api.NoteList.addNote(_params).then(res => {
             if (res.code === 200) {
               this.$message({

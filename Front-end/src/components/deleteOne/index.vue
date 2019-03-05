@@ -2,10 +2,10 @@
   <div class="deleteOne">
     <div class="deleteOne-one">
       <div class="deleteOne-one-content">
-        <p class="deleteOne-one-content-title">{{data.title}}</p>
-        <p class="deleteOne-one-content-type">Type：<span>{{data.type}}</span></p>
-        <p class="deleteOne-one-content-time">Date：<span>{{data.time | formatTime}}</span></p>
-        <p class="deleteOne-one-content-content">Content：<span>{{data.content}}</span></p>
+        <p class="deleteOne-one-content-title">{{data.Note_Name}}</p>
+        <p class="deleteOne-one-content-type">Type：<span>{{data.Note_Type}}</span></p>
+        <p class="deleteOne-one-content-time">Date：<span>{{data.Note_Time | formatTime}}</span></p>
+        <p class="deleteOne-one-content-content">Content：<span>{{data.Note_Content}}</span></p>
       </div>
       <div class="deleteOne-one-btnGroup">
         <el-tooltip effect="dark" content="还原此条Note" placement="top">
@@ -47,10 +47,10 @@ export default {
 
     // 截取文本
     changeContent (e) {
-      let _content = e.content.split('</p>')[0]
+      let _content = e.Note_Content.split('</p>')[0]
       // 匹配标签
       _content = _content.replace(/<[^<>]+>/g, '')
-      e.content = _content
+      e.Note_Content = _content
     }
   },
   filters: {

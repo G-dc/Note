@@ -55,8 +55,13 @@ export function moveToRecycleBin (data) {
 }
 
 // 获取回收站列表
-export function getDeleteList () {
-  return ajx.get('/vue-note/api/getRecycleBinNoteList')
+export function getDeleteList (params) {
+  return ajx.get('/vue-note/api/getRecycleBinNoteList', {
+    params: {
+      pageIndex: params.pageIndex,
+      pageSize: params.pageSize
+    }
+  })
 }
 
 // 移除回收站Note

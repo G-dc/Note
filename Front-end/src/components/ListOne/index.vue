@@ -1,10 +1,10 @@
 <template>
   <div class="listOne" @mouseenter="mouseenter" @mouseleave="mouseleave">
-    <div class="listOne-content" :class="currentId === data.id ? 'click-one' : ''">
+    <div class="listOne-content" :class="currentId === data.Note_Id ? 'click-one' : ''">
       <div class="listOne-content-left" @click="chooseOne(data)">
-        <p class="listOne-content-left-title">{{data.title}}</p>
+        <p class="listOne-content-left-title">{{data.Note_Name}}</p>
       </div>
-      <div class="listOne-content-right" v-if="showBtn || currentId === data.id">
+      <div class="listOne-content-right" v-if="showBtn || currentId === data.Note_Id">
         <img class="listOne-content-right-img" src="../../../static/images/icon-delete.png" @click="deleteOne(data)">
       </div>
       <div style="clear: both;"></div>
@@ -42,7 +42,7 @@ export default {
       this.$emit('chooseOne', e)
     },
     deleteOne (e) {
-      this.$emit('deleteNote', e.id)
+      this.$emit('deleteNote', e.Note_Id)
     }
   },
   filters: {

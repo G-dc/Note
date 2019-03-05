@@ -8,8 +8,9 @@
       v-if="$store.state.pagination.total > 0"
       @current-change="changePage"
       :total="$store.state.pagination.total"
-      :current-page="currentPage"
-      :page-size="8"></el-pagination>
+      :current-page="getDeleteListTemp.pageIndex"
+      :page-size="8">
+    </el-pagination>
   </div>
 </template>
 
@@ -20,7 +21,11 @@ export default {
   data () {
     return {
       deleteList: [],
-      currentPage: 1
+      currentPage: 1,
+      getDeleteListTemp: {
+        pageIndex: 1,
+        pageSize: 8
+      }
     }
   },
   components: {
@@ -29,10 +34,12 @@ export default {
   methods: {
     getList () {
       this.deleteList = []
-      api.NoteList.getDeleteList().then(res => {
+      api.NoteList.getDeleteList(this.getDeleteListTemp).then(res => {
         if (res.code === 200) {
-          this.deleteList.push(...res.data.slice((this.currentPage - 1) * 8, this.currentPage * 8))
-          this.$store.commit('UPDATE_TOTAL_PAGE', this.deleteList.length)
+          this.deleteList.push(...res.data)
+          this.$store.commit('UPDATE_TOTAL_PAGE', res.totalSize)
+          // this.deleteList.push(...res.data.slice((this.currentPage - 1) * 8, this.currentPage * 8))
+          // this.$store.commit('UPDATE_TOTAL_PAGE', this.deleteList.length)
         } else {
           this.$message({
             message: res.msg,
@@ -43,14 +50,14 @@ export default {
       })
     },
     backData (e) {
-      this.$confirm('是否确认还原 ' + e.title + ' ?', '提示', {
+      this.$confirm('是否确认还原 ' + e.Note_Name + ' ?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        api.NoteList.returnRecycleBinNote(e.time).then(res => {
+        api.NoteList.returnRecycleBinNote(e.Note_Time).then(res => {
           if (res.code === 200) {
-            api.NoteList.deleteRecycleBinOne(e.id).then(res1 => {
+            api.NoteList.deleteRecycleBinOne(e.Note_Id).then(res1 => {
               if (res.code === 200) {
                 this.$message({
                   message: '已成功还原，当前页面数据将重新加载。',
@@ -74,12 +81,12 @@ export default {
       })
     },
     deleteData (e) {
-      this.$confirm('是否确认完全删除 ' + e.title + ' ?', '提示', {
+      this.$confirm('是否确认完全删除 ' + e.Note_Name + ' ?', '提示', {
         confirmButtonText: '确认',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        api.NoteList.deleteRecycleBinOne(e.id).then(res => {
+        api.NoteList.deleteRecycleBinOne(e.Note_Id).then(res => {
           if (res.code === 200) {
             this.$message({
               message: '已成功删除，当前页面数据将重新加载。',
@@ -101,6 +108,7 @@ export default {
       })
     },
     changePage (val) {
+      this.getDeleteListTemp.pageIndex = val
       this.currentPage = val
       this.getList()
     }

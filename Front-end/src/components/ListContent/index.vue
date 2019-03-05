@@ -1,8 +1,8 @@
 <template>
   <div class="content" style="position: relative;">
     <div class="listContent">
-      <p class="listContent-title">{{data.title}}</p>
-      <div class="listContent-content ql-editor" v-html="data.content"></div>
+      <p class="listContent-title">{{data.Note_Name}}</p>
+      <div class="listContent-content ql-editor" v-html="data.Note_Content"></div>
       <el-button class="btn" type="primary" circle  icon="el-icon-edit" @click="editOne"></el-button>
     </div>
   </div>
