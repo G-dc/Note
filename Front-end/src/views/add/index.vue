@@ -22,14 +22,13 @@
       </el-form-item>
       <el-form-item style="margin-top: 100px;width: 80%;text-align: right;">
         <el-button @click="resetFormData('form')">重置</el-button>
-        <el-button type="warning" :loading=isSaving @click="saveFormData">保存</el-button>
+        <el-button type="warning" :loading=isSaving @click="saveFormData">{{ isSaving ? '保存中' : '保存' }}</el-button>
       </el-form-item>
     </el-form>
   </div>
 </template>
 
 <script>
-import api from '@/api/index'
 import qs from 'qs'
 export default {
   data () {
@@ -73,30 +72,42 @@ export default {
     }
   },
   methods: {
-    getNoteTypeList () {
+    // 获取Note分类列表
+    async getNoteTypeList () {
       this.typeList = []
-      api.NoteList.getNoteTypeList().then(res => {
-        if (res.code === 200) {
-          this.typeList.push(...res.data.content)
+
+      try {
+        const _data = await this.$api.NoteList.getNoteTypeList()
+
+        if (_data.code === 200) {
+          this.typeList.push(..._data.data.content)
         }
-      })
+      } catch (error) {}
     },
-    getNoteOne (e) {
-      api.NoteList.getOne(e).then(res => {
-        if (res.code === 200) {
-          this.form.title = res.data.Note_Name
-          this.form.content = res.data.Note_Content
-          this.form.type = res.data.Note_Type
+
+    // 根据入参获取单篇Note信息
+    async getNoteOne (e) {
+      try {
+        const _data = await this.$api.NoteList.getOne(e)
+
+        if (_data.code === 200) {
+          this.form.title = _data.data.Note_Name
+          this.form.content = _data.data.Note_Content
+          this.form.type = _data.data.Note_Type
 
           const _id = 'id'
-          this.form[_id] = res.data.Note_Id
+          this.form[_id] = _data.data.Note_Id
         }
-      })
+      } catch (error) {}
     },
+
+    // 重置Form表单
     resetFormData (formName) {
       this.$refs[formName].resetFields()
     },
-    saveFormData () {
+
+    // 保存&更新Note信息
+    async saveFormData () {
       if (!this.form.title.trim()) {
         this.$message({
           message: '请输入标题',
@@ -116,13 +127,16 @@ export default {
           duration: 1000
         })
       } else {
+        const time = new Date()
         if (this.$route.query.NoteId) {
-          let time = new Date()
-          let key = 'Note_Time'
+          const key = 'Note_Time'
           this.form[key] = time.getTime()
           const _params = qs.stringify(this.form)
-          api.NoteList.updateNote(_params).then(res => {
-            if (res.code === 200) {
+
+          try {
+            const _data = await this.$api.NoteList.updateNote(_params)
+
+            if (_data.code === 200) {
               this.$message({
                 message: '更新note成功',
                 type: 'success',
@@ -135,14 +149,16 @@ export default {
                 })
               }, 1500)
             }
-          })
+          } catch (error) {}
         } else {
-          let time = new Date()
           const key = 'time'
           this.form[key] = time.getTime()
           const _params = qs.stringify(this.form)
-          api.NoteList.addNote(_params).then(res => {
-            if (res.code === 200) {
+
+          try {
+            const _data = await this.$api.NoteList.addNote(_params)
+
+            if (_data.code === 200) {
               this.$message({
                 message: '新增note成功',
                 type: 'success',
@@ -155,7 +171,7 @@ export default {
                 })
               }, 1500)
             }
-          })
+          } catch (error) {}
         }
       }
     }

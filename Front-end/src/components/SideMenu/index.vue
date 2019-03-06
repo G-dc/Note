@@ -25,7 +25,7 @@ export default {
   watch: {
     '$route.name': {
       handler (val) {
-        let _currentVal = this.list.find((value, index, arr) => {
+        let _currentVal = this.list.find(value => {
           return value.name === val
         })
         this.selectedId = _currentVal.id

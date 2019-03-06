@@ -33,13 +33,11 @@
 <script>
 import ListAll from '../../components/ListAll'
 import ListContent from '../../components/ListContent'
-import api from '@/api/index'
 export default {
   data () {
     return {
       NoteList: [],
       currentNoteDetail: {},
-      currentPage: 1,
       NoteTypeList: [],
       currentType: '全部',
       getListTemp: {
@@ -54,24 +52,32 @@ export default {
     ListContent
   },
   methods: {
-    getNoteTypeList () {
+    // 获取Note分类列表
+    async getNoteTypeList () {
       this.NoteTypeList = []
-      api.NoteList.getNoteTypeList().then(res => {
-        if (res.code === 200) {
-          this.NoteTypeList.push(...res.data.content)
+
+      try {
+        const _data = await this.$api.NoteList.getNoteTypeList()
+
+        this.NoteTypeList.push({ Type_Id: 0, Type_Name: '全部' })
+
+        if (_data.code === 200) {
+          this.NoteTypeList.push(..._data.data.content)
         }
-        this.NoteTypeList.unshift({ Type_Id: 0, Type_Name: '全部' })
-      })
+      } catch (error) {}
     },
-    getData () {
+
+    // 根据分类获取Note列表
+    async getData () {
       this.NoteList = []
       if (this.getListTemp.currentType === '全部') {
-        api.NoteList.getAllList(this.getListTemp).then(res => {
-          const data = res.data
-          if (res.code === 200) {
-            if (data.content.length > 0) {
-              this.NoteList.push(...data.content)
-              this.$store.commit('UPDATE_TOTAL_PAGE', data.totalSize)
+        try {
+          const _data = await this.$api.NoteList.getAllList(this.getListTemp)
+
+          if (_data.code === 200) {
+            if (_data.data.content.length > 0) {
+              this.NoteList.push(..._data.data.content)
+              this.$store.commit('UPDATE_TOTAL_PAGE', _data.data.totalSize)
               this.setData()
             } else {
               this.$store.commit('UPDATE_TOTAL_PAGE', 0)
@@ -79,36 +85,37 @@ export default {
             }
           } else {
             this.$message({
-              message: res.msg,
+              message: _data.msg,
               type: 'info',
               duration: 1000
             })
+
             this.$store.commit('UPDATE_TOTAL_PAGE', 0)
             this.setData()
           }
-        })
+        } catch (error) {}
       } else {
-        api.NoteList.getSomeList(this.getListTemp).then(res => {
-          const data = res.data
-          if (res.code === 200) {
-            if (data.content.length > 0) {
-              this.NoteList.push(...data.content)
-              this.$store.commit('UPDATE_TOTAL_PAGE', data.totalSize)
-              this.setData()
-            } else {
-              this.$store.commit('UPDATE_TOTAL_PAGE', 0)
-              this.setData()
-            }
+        const _data = await this.$api.NoteList.getSomeList(this.getListTemp)
+
+        if (_data.code === 200) {
+          if (_data.data.content.length > 0) {
+            this.NoteList.push(..._data.data.content)
+            this.$store.commit('UPDATE_TOTAL_PAGE', _data.data.totalSize)
+            this.setData()
           } else {
-            this.$message({
-              message: res.msg,
-              type: 'info',
-              duration: 1000
-            })
             this.$store.commit('UPDATE_TOTAL_PAGE', 0)
             this.setData()
           }
-        })
+        } else {
+          this.$message({
+            message: _data.msg,
+            type: 'info',
+            duration: 1000
+          })
+
+          this.$store.commit('UPDATE_TOTAL_PAGE', 0)
+          this.setData()
+        }
       }
     },
     setData () {
@@ -120,42 +127,45 @@ export default {
         this.$store.commit('UPDATE_NOTE_ID', undefined)
       }
     },
-    chooseOne (e) {
-      api.NoteList.getOne(e.Note_Id).then(res => {
-        if (res.code === 200) {
-          this.$store.commit('UPDATE_NOTE_ID', res.data.Note_Id)
-          this.currentNoteDetail = res.data
+
+    // 选中单条Note
+    async chooseOne (e) {
+      try {
+        const _data = await this.$api.NoteList.getOne(e.Note_Id)
+
+        if (_data.code === 200) {
+          this.$store.commit('UPDATE_NOTE_ID', _data.data.Note_Id)
+          this.currentNoteDetail = _data.data
         }
-      })
+      } catch (error) {}
     },
+
+    // 移动Note至回收站
     deleteNote (e) {
       this.$confirm('是否确认删除该note，将之移动至回收站？', '提示', {
         confirmButtonText: '确认',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
+      }).then(async () => {
         const _NoteOne = this.NoteList.find(value => {
-          return value.id === e
+          return value.Note_Id === e
         })
-        api.NoteList.moveToRecycleBin(_NoteOne.Note_Time).then(res => {
-          if (res.code === 200) {
-            api.NoteList.deleteOne(_NoteOne.Note_Id).then(res1 => {
-              if (res1.code === 200) {
-                this.$message({
-                  message: '删除成功，可以在回收站查看删除内容，当前页面数据将重新加载。',
-                  type: 'success',
-                  duration: 1000
-                })
-                // this.NoteList.length--
-                // this.currentPage = this.NoteList.length === 0 ? this.currentPage - 1 : this.currentPage
 
-                setTimeout(() => {
-                  this.getData()
-                }, 1500)
-              }
+        try {
+          const _data = await this.$api.NoteList.moveToRecycleBin(_NoteOne.Note_Time, _NoteOne.Note_Id)
+
+          if (_data.code === 200) {
+            this.$message({
+              message: '删除成功，可以在回收站查看删除内容，当前页面数据将重新加载。',
+              type: 'success',
+              duration: 1000
             })
+
+            setTimeout(() => {
+              this.getData()
+            }, 1500)
           }
-        })
+        } catch (error) {}
       }).catch(() => {
         this.$message({
           message: '操作已取消',
@@ -164,10 +174,14 @@ export default {
         })
       })
     },
+
+    // 切换当前分页
     changePage (val) {
-      this.currentPage = val
+      this.getListTemp.pageIndex = val
       this.getData()
     },
+
+    // 编辑Note
     editOne (e) {
       this.$confirm('确认编辑该内容？', '提示', {
         confirmButtonText: '确认',
@@ -188,7 +202,10 @@ export default {
         })
       })
     },
+
+    // 修改分类
     changeType (val) {
+      this.getListTemp.currentType = val
       this.currentNoteDetail = {}
       this.$store.commit('UPDATE_TOTAL_PAGE', 0)
       this.getData()

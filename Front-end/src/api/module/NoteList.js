@@ -46,10 +46,11 @@ export function deleteOne (data) {
 }
 
 // 移除特定的Note到回收站
-export function moveToRecycleBin (data) {
+export function moveToRecycleBin (data1, data2) {
   return ajx.get('/vue-note/api/moveToRecycleBin', {
     params: {
-      time: data
+      time: data1,
+      id: data2
     }
   })
 }
@@ -74,10 +75,11 @@ export function deleteRecycleBinOne (data) {
 }
 
 // 还原回收站Note
-export function returnRecycleBinNote (data) {
+export function returnRecycleBinNote (data1, data2) {
   return ajx.get('/vue-note/api/moveFromRecycleBin', {
     params: {
-      time: data
+      time: data1,
+      id: data2
     }
   })
 }

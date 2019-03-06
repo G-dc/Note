@@ -41,9 +41,6 @@ export default {
   }
   .right-content {
     flex: 1;
-    // display: inline-block;
-    // float: right;
-    // width: 88%;
   }
 }
 </style>

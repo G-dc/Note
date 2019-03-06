@@ -12,10 +12,14 @@ import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.bubble.css'
 
+import api from '@/api/index'
+
 Vue.use(ElementUI)
 Vue.use(VueQuillEditor)
 
 Vue.config.productionTip = false
+
+Vue.prototype.$api = api
 
 /* eslint-disable no-new */
 new Vue({
