@@ -93,9 +93,23 @@ router.get('/moveToRecycleBin', (req, res) => {
           msg: '移除失败，请稍后重试'
         })
       } else {
-        res.json({
-          code: 200,
-          msg: '移除成功'
+        // 从Note列表移除对应数据
+        conn.query($.editNote.delete, [params.id], (err1, result1) => {
+          if (err1) {
+            res.status = 500
+          } else {
+            if (typeof result1 === 'undefined') {
+              res.json({
+                code: 416,
+                msg: '移除失败，请稍后重试'
+              })
+            } else {
+              res.json({
+                code: 200,
+                msg: '移除成功'
+              })
+            }
+          }
         })
       }
     }
@@ -355,9 +369,25 @@ router.get('/moveFromRecycleBin', (req, res) => {
           msg: '还原失败，请稍后重试'
         })
       } else {
-        res.json({
-          code: 200,
-          msg: '还原成功'
+
+        // 执行从回收站删除数据相关sql语句
+
+        conn.query($.editDeleteNote.delete, [params.id], (err1, result1) => {
+          if (err1) {
+            res.status = 500
+          } else {
+            if (typeof result1 === 'undefined') {
+              res.json({
+                code: 416,
+                msg: '还原失败，请稍后重试'
+              })
+            } else {
+              res.json({
+                code: 200,
+                msg: '还原成功'
+              })
+            }
+          }
         })
       }
     }
